@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>خطة هندسة وأمن شبكات الحاسوب | NES Plan Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body.dark-mode {
+      --bg-color: #080c14;
+      --viewport-bg: radial-gradient(circle at center, #111827 0%, #080c14 100%);
+      --panel-bg: rgba(17, 24, 39, 0.92);
+      --card-bg: #1e293b;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --node-solid-fill: #111827;
+      --node-text: #f1f5f9;
+      --link-color: #475569;
+      --glow-intensity: 12px;
+      --modal-bg: #1e293b;
+      --btn-bg: #334155;
+
+      --c-completed-bg: #064e3b;
+      --c-completed-text: #ffffff;
+      --c-current-bg: #1e3a8a;
+      --c-current-text: #ffffff;
+      --c-next-bg: #78350f;
+      --c-next-text: #ffffff;
+      --c-summer-bg: #831843;
+      --c-summer-text: #ffffff;
+      --c-next-year-bg: #581c87;
+      --c-next-year-text: #ffffff;
+      --c-term-2028-bg: #164e63;
+      --c-term-2028-text: #ffffff;
+
+      --grid-dot-color: rgba(56, 189, 248, 0.07);
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.14);
+    }
+
+    body.light-mode {
+      --bg-color: #f1f5f9;
+      --viewport-bg: radial-gradient(circle at center, #ffffff 0%, #e2e8f0 100%);
+      --panel-bg: rgba(255, 255, 255, 0.95);
+      --card-bg: #ffffff;
+      --border-color: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --node-solid-fill: #ffffff;
+      --node-text: #0f172a;
+      --link-color: #94a3b8;
+      --glow-intensity: 7px;
+      --modal-bg: #ffffff;
+      --btn-bg: #f1f5f9;
+
+      --c-completed-bg: #d1fae5;
+      --c-completed-text: #065f46;
+      --c-current-bg: #dbeafe;
+      --c-current-text: #1e40af;
+      --c-next-bg: #fef3c7;
+      --c-next-text: #92400e;
+      --c-summer-bg: #fce7f3;
+      --c-summer-text: #9d174d;
+      --c-next-year-bg: #ede9fe;
+      --c-next-year-text: #5b21b6;
+      --c-term-2028-bg: #cffafe;
+      --c-term-2028-text: #155e75;
+
+      --grid-dot-color: rgba(14, 116, 144, 0.09);
+      --accent: #0891b2;
+      --accent-soft: rgba(8, 145, 178, 0.12);
+    }
+
+    * { box-sizing: border-box; user-select: none; -webkit-touch-callout: none; }
+    
+    body[dir="rtl"], body[dir="rtl"] * {
+      font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    }
+    body[dir="ltr"], body[dir="ltr"] * {
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #pctText, #completedHours, #totalHours, #completedCourses, #totalCourses,
+    #count-completed, #count-current, #count-next, #count-summer, #count-next-year, #count-term-2028,
+    .node-credits {
+      font-family: 'IBM Plex Mono', 'Consolas', monospace !important;
+      letter-spacing: 0.01em;
+    }
+
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.3s; touch-action: none; }
+
+    #dashboard {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 100;
+      background: var(--panel-bg);
+      backdrop-filter: blur(14px);
+      border-radius: 18px;
+      padding: 14px 20px 16px;
+      box-shadow: 0 10px 34px rgba(0,0,0,0.28);
+      border: 1px solid var(--border-color);
+      border-top: 1px solid var(--accent-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .dash-header h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dash-header h2::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      flex-shrink: 0;
+      animation: pulse-dot 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.55; transform: scale(0.8); }
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toggle-btn {
+      background: var(--btn-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 6px 13px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .collapse-btn {
+      display: none;
+      width: 30px;
+      height: 30px;
+      align-items: center;
+      justify-content: center;
+      background: var(--btn-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      font-size: 0.75rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 0.76rem;
+      align-items: center;
+      overflow: hidden;
+      max-height: 200px;
+      opacity: 1;
+      transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
+    }
+    #dashboard.collapsed .stats-row {
+      max-height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      background: var(--btn-bg);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .badge-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #10b981, #06b6d4);
+      box-shadow: 0 0 10px #10b981;
+      transition: width 0.4s ease;
+    }
+
+    #viewport {
+      width: 100vw;
+      height: 100vh;
+      cursor: grab;
+      overflow: hidden;
+      background-color: var(--bg-color);
+      background-image: var(--viewport-bg), radial-gradient(var(--grid-dot-color) 1.4px, transparent 1.4px);
+      background-size: 100% 100%, 26px 26px;
+      background-position: 0 0, 0 0;
+    }
+    #viewport:active { cursor: grabbing; }
+
+    svg#canvas { width: 100%; height: 100%; display: block; }
+
+    .link-solid { stroke: var(--link-color); stroke-width: 2.4; fill: none; transition: stroke 0.2s; }
+    .link-dashed { stroke: var(--link-color); stroke-width: 2.4; stroke-dasharray: 6,6; fill: none; transition: stroke 0.2s; }
+
+    .node-group { cursor: pointer; transition: transform 0.15s ease; transform-box: fill-box; transform-origin: center; }
+
+    @media (hover: hover) and (pointer: fine) {
+      .node-group:hover { transform: scale(1.045); }
+      .node-group:hover .node-circle { stroke-width: 4.5px; }
+      .node-group:hover .node-mask { filter: brightness(1.1); }
+    }
+
+    .node-mask {
+      fill: var(--node-solid-fill);
+      stroke: none;
+      transition: fill 0.25s ease, filter 0.15s ease;
+    }
+
+    .node-circle {
+      fill: transparent;
+      stroke-width: 3px;
+      transition: all 0.2s ease;
+    }
+    .status-ring {
+      fill: none;
+      stroke-width: 0px;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .node-text {
+      font-size: 11.5px;
+      font-weight: 600;
+      text-anchor: middle;
+      dominant-baseline: central;
+      fill: var(--node-text);
+      pointer-events: none;
+      transition: fill 0.25s ease;
+    }
+    .node-credits {
+      font-size: 10.5px;
+      font-weight: 600;
+      text-anchor: middle;
+      dominant-baseline: central;
+      fill: var(--accent);
+      pointer-events: none;
+    }
+
+    .status-completed .status-ring { stroke: #10b981; stroke-width: 5px; filter: drop-shadow(0 0 var(--glow-intensity) #10b981); }
+    .status-completed .node-mask { fill: var(--c-completed-bg); }
+    .status-completed .node-text { fill: var(--c-completed-text) !important; }
+
+    .status-current .status-ring { stroke: #3b82f6; stroke-width: 5px; animation: pulse-current-ring 2.6s ease-in-out infinite; }
+    .status-current .node-mask { fill: var(--c-current-bg); }
+    .status-current .node-text { fill: var(--c-current-text); }
+    @keyframes pulse-current-ring {
+      0%, 100% { filter: drop-shadow(0 0 var(--glow-intensity) #3b82f6); }
+      50% { filter: drop-shadow(0 0 calc(var(--glow-intensity) * 2) #3b82f6); }
+    }
+
+    .status-next .status-ring { stroke: #f59e0b; stroke-width: 5px; filter: drop-shadow(0 0 var(--glow-intensity) #f59e0b); }
+    .status-next .node-mask { fill: var(--c-next-bg); }
+    .status-next .node-text { fill: var(--c-next-text); }
+
+    .status-summer .status-ring { stroke: #ec4899; stroke-width: 5px; filter: drop-shadow(0 0 var(--glow-intensity) #ec4899); }
+    .status-summer .node-mask { fill: var(--c-summer-bg); }
+    .status-summer .node-text { fill: var(--c-summer-text); }
+
+    .status-next-year .status-ring { stroke: #a855f7; stroke-width: 5px; filter: drop-shadow(0 0 var(--glow-intensity) #a855f7); }
+    .status-next-year .node-mask { fill: var(--c-next-year-bg); }
+    .status-next-year .node-text { fill: var(--c-next-year-text); }
+
+    .status-term-2028 .status-ring { stroke: #06b6d4; stroke-width: 5px; filter: drop-shadow(0 0 var(--glow-intensity) #06b6d4); }
+    .status-term-2028 .node-mask { fill: var(--c-term-2028-bg); }
+    .status-term-2028 .node-text { fill: var(--c-term-2028-text); }
+
+    #actionModal {
+      position: absolute;
+      display: none;
+      opacity: 0;
+      transform: scale(0.95) translateY(4px);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 200;
+      background: var(--modal-bg);
+      border-radius: 16px;
+      box-shadow: 0 20px 46px rgba(0,0,0,0.5);
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      padding-top: 18px;
+      width: 260px;
+      overflow: hidden;
+    }
+    #actionModal.show { opacity: 1; transform: scale(1) translateY(0); }
+    #actionModal::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #38bdf8, #06b6d4);
+    }
+    #actionModal h4 { margin: 0 0 12px 0; font-size: 0.92rem; color: var(--accent); text-align: center; font-weight: 700; }
+    .btn-status {
+      display: block;
+      width: 100%;
+      text-align: inherit;
+      padding: 9px 13px;
+      margin-bottom: 6px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      font-size: 0.83rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.1s, filter 0.15s;
+    }
+    .btn-status:hover { filter: brightness(1.15); }
+    .btn-status:active { transform: scale(0.98); }
+    .btn-completed { background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: #10b981; }
+    .btn-current { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border-color: #3b82f6; }
+    .btn-next { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border-color: #f59e0b; }
+    .btn-summer { background: rgba(236, 72, 153, 0.2); color: #ec4899; border-color: #ec4899; }
+    .btn-next-year { background: rgba(168, 85, 247, 0.2); color: #a855f7; border-color: #a855f7; }
+    .btn-term-2028 { background: rgba(6, 182, 212, 0.2); color: #06b6d4; border-color: #06b6d4; }
+    .btn-reset { background: var(--btn-bg); color: var(--text-muted); }
+
+    .legend-box {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--accent-soft);
+      padding: 10px 16px;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      font-size: 0.74rem;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      z-index: 100;
+    }
+    body[dir="ltr"] .legend-box { right: auto; left: 16px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 500; }
+
+    .zoom-controls {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    body[dir="ltr"] .zoom-controls { left: auto; right: 16px; }
+    .zoom-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      line-height: 1;
+      padding: 0;
+    }
+    .zoom-btn:active { transform: scale(0.92); }
+    .zoom-btn.fit-btn { font-size: 0.95rem; color: var(--accent); }
+
+    @media (max-width: 768px) {
+      #dashboard { padding: 10px 14px; border-radius: 14px; gap: 8px; }
+      .dash-header h2 { font-size: 0.92rem; }
+      .stats-row { font-size: 0.7rem; gap: 6px; }
+      .stat-badge { padding: 3px 8px; }
+      .legend-box { display: none; }
+      .collapse-btn { display: flex; }
+      .zoom-btn { width: 40px; height: 40px; }
+      #actionModal {
+        position: fixed;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) scale(0.95);
+        width: 85vw;
+        max-width: 320px;
+      }
+      #actionModal.show { transform: translate(-50%, -50%) scale(1); }
+    }
+  </style>
+</head>
+<body class="dark-mode" dir="rtl">
+
+  <div id="dashboard">
+    <div class="dash-header">
+      <h2 id="lblTitle">خطة هندسة وأمن شبكات الحاسوب (2022)</h2>
+      <div class="header-controls">
+        <button class="collapse-btn" onclick="toggleCollapse()" id="collapseBtn" aria-label="Toggle details">▾</button>
+        <button class="toggle-btn" onclick="toggleTheme()" id="themeBtn">☀️ White</button>
+        <button class="toggle-btn" onclick="toggleLang()" id="langBtn">🌐 English</button>
+      </div>
+      <div style="font-size: 0.82rem; color: var(--text-muted);">
+        <span id="lblProgress">الإنجاز:</span> 
+        <strong id="pctText" style="color: var(--accent);">0%</strong> 
+        (<strong id="completedHours">0</strong> / <span id="totalHours">160</span> <span id="lblHoursUnit">ساعة</span>)
+        - <span id="completedCourses">0</span> / <span id="totalCourses">0</span> <span id="lblCoursesUnit">مادة</span>
+      </div>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-fill" id="progressBar"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-badge"><span class="badge-dot" style="background: #10b981;"></span> <span id="lblStatusCompleted">مكتمل:</span> <span id="count-completed">0 س</span></div>
+      <div class="stat-badge"><span class="badge-dot" style="background: #3b82f6;"></span> <span id="lblStatusCurrent">الأول 2026/2027:</span> <span id="count-current">0 س</span></div>
+      <div class="stat-badge"><span class="badge-dot" style="background: #f59e0b;"></span> <span id="lblStatusNext">الثاني 2027:</span> <span id="count-next">0 س</span></div>
+      <div class="stat-badge"><span class="badge-dot" style="background: #ec4899;"></span> <span id="lblStatusSummer">صيفي 2027:</span> <span id="count-summer">0 س</span></div>
+      <div class="stat-badge"><span class="badge-dot" style="background: #a855f7;"></span> <span id="lblStatusNextYear">الأول 2027/2028:</span> <span id="count-next-year">0 س</span></div>
+      <div class="stat-badge"><span class="badge-dot" style="background: #06b6d4;"></span> <span id="lblStatusTerm2028">الثاني 2028:</span> <span id="count-term-2028">0 س</span></div>
+      <div style="margin-right: auto; color: var(--text-muted); font-size: 0.72rem; font-weight: 500; opacity: 0.85;" id="lblControlsHint"></div>
+    </div>
+  </div>
+
+  <div class="legend-box">
+    <div style="font-weight: 700; margin-bottom: 2px; color: var(--accent); font-size: 0.78rem;" id="lblLegendTitle">نوع المتطلب:</div>
+    <div class="legend-item">
+      <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="var(--link-color)" stroke-width="2.5"/></svg>
+      <span id="lblPrereqPass">سابق نجاح</span>
+    </div>
+    <div class="legend-item">
+      <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="var(--link-color)" stroke-width="2.5" stroke-dasharray="4,4"/></svg>
+      <span id="lblPrereqStudy">سابق دراسة / متزامن</span>
+    </div>
+  </div>
+
+  <div class="zoom-controls">
+    <button class="zoom-btn" onclick="zoomStep(1)" aria-label="Zoom in">+</button>
+    <button class="zoom-btn fit-btn" onclick="fitToScreen(true)" aria-label="Fit to screen">⤢</button>
+    <button class="zoom-btn" onclick="zoomStep(-1)" aria-label="Zoom out">−</button>
+  </div>
+
+  <div id="viewport">
+    <svg id="canvas">
+      <defs>
+        <marker id="arrow-solid" markerWidth="10" markerHeight="10" refX="8" refY="4.5" orient="auto">
+          <path d="M 0 0 L 9 4.5 L 0 9 Z" fill="var(--link-color)" />
+        </marker>
+        <marker id="arrow-dashed" markerWidth="10" markerHeight="10" refX="8" refY="4.5" orient="auto">
+          <path d="M 0 0 L 9 4.5 L 0 9 Z" fill="var(--link-color)" />
+        </marker>
+      </defs>
+      <g id="scene"></g>
+    </svg>
+  </div>
+
+  <div id="actionModal">
+    <h4 id="modalCourseTitle">اسم المادة</h4>
+    <button class="btn-status btn-completed" onclick="setCourseStatus('completed')" id="btnMCompleted">✅ مكتمل</button>
+    <button class="btn-status btn-current" onclick="setCourseStatus('current')" id="btnMCurrent">📘 الفصل الأول 2026/2027</button>
+    <button class="btn-status btn-next" onclick="setCourseStatus('next')" id="btnMNext">⏳ الفصل الثاني 2027</button>
+    <button class="btn-status btn-summer" onclick="setCourseStatus('summer')" id="btnMSummer">☀️ الفصل الصيفي 2027</button>
+    <button class="btn-status btn-next-year" onclick="setCourseStatus('next-year')" id="btnMNextYear">🎯 الفصل الأول 2027/2028</button>
+    <button class="btn-status btn-term-2028" onclick="setCourseStatus('term-2028')" id="btnMTerm2028">💎 الفصل الثاني 2028</button>
+    <button class="btn-status btn-reset" onclick="setCourseStatus('none')" id="btnMReset">⚪ غير محدد (متبقي)</button>
+  </div>
+
+  <script>
+    const nodeRadius = 45;
+    const ringRadius = 52;
+
+    const translations = {
+      ar: {
+        title: "خطة هندسة وأمن شبكات الحاسوب (2022)",
+        themeBtnLight: "☀️ White",
+        themeBtnDark: "🌙 Dark",
+        langBtn: "🌐 English",
+        progress: "الإنجاز:",
+        hoursUnit: "ساعة",
+        coursesUnit: "مادة",
+        stCompleted: "مكتمل:",
+        stCurrent: "الأول 2026/2027:",
+        stNext: "الثاني 2027:",
+        stSummer: "صيفي 2027:",
+        stNextYear: "الأول 2027/2028:",
+        stTerm2028: "الثاني 2028:",
+        hintPC: "(Left-Click: مكتمل فوري | Right-Click: الخيارات)",
+        hintMobile: "(Tap: مكتمل فوري | Hold: الخيارات)",
+        legTitle: "نوع المتطلب:",
+        legPass: "سابق نجاح",
+        legStudy: "سابق دراسة / متزامن",
+        mComp: "✅ مكتمل",
+        mCurr: "📘 الفصل الأول 2026/2027",
+        mNext: "⏳ الفصل الثاني 2027",
+        mSumm: "☀️ الفصل الصيفي 2027",
+        mNY: "🎯 الفصل الأول 2027/2028",
+        mTerm28: "💎 الفصل الثاني 2028",
+        mReset: "⚪ غير محدد (متبقي)",
+        crSuffix: "س"
+      },
+      en: {
+        title: "NES Study Plan (2022 Plan)",
+        themeBtnLight: "☀️ Light",
+        themeBtnDark: "🌙 Dark",
+        langBtn: "🌐 العربية",
+        progress: "Progress:",
+        hoursUnit: "Credits",
+        coursesUnit: "Courses",
+        stCompleted: "Completed:",
+        stCurrent: "Fall 2026/2027:",
+        stNext: "Spring 2027:",
+        stSummer: "Summer 2027:",
+        stNextYear: "Fall 2027/2028:",
+        stTerm2028: "Spring 2028:",
+        hintPC: "(Left-Click: Toggle Completed | Right-Click: Options)",
+        hintMobile: "(Tap: Toggle Completed | Hold: Options)",
+        legTitle: "Requirement Type:",
+        legPass: "Prerequisite (Pass)",
+        legStudy: "Prerequisite / Co-requisite",
+        mComp: "✅ Completed",
+        mCurr: "📘 Fall 2026/2027",
+        mNext: "⏳ Spring 2027",
+        mSumm: "☀️ Summer 2027",
+        mNY: "🎯 Fall 2027/2028",
+        mTerm28: "💎 Spring 2028",
+        mReset: "⚪ Reset / Remaining",
+        crSuffix: "Cr"
+      }
+    };
+
+    let currentLang = localStorage.getItem('study_lang') || 'ar';
+    let currentTheme = localStorage.getItem('study_theme') || 'dark';
+
+    const nodes = [
+      { id: "eng1", name_ar: "اللغة الإنجليزية\nومهارات الاتصال", name_en: "English\nCommunication", cr: 3, x: 1260, y: 170, stroke: "#0284c7" },
+      { id: "mech", name_ar: "ميكانيكا\nهندسية", name_en: "Engineering\nMechanics", cr: 3, x: 1100, y: 170, stroke: "#64748b" },
+      { id: "phys1", name_ar: "فيزياء 1", name_en: "Physics 1", cr: 3, x: 940, y: 170, stroke: "#c084fc" },
+      { id: "calc1", name_ar: "تفاضل\nوتكامل 1", name_en: "Calculus 1", cr: 3, x: 780, y: 170, stroke: "#0284c7" },
+      { id: "intro_it", name_ar: "مقدمة إلى\nتكنولوجيا المعلومات", name_en: "Intro to IT", cr: 3, x: 620, y: 170, stroke: "#38bdf8" },
+      { id: "prog1", name_ar: "مقدمة\nإلى البرمجة", name_en: "Intro to\nProgramming", cr: 3, x: 460, y: 170, stroke: "#facc15" },
+      { id: "discrete", name_ar: "رياضيات\nمتقطعة", name_en: "Discrete\nMath", cr: 3, x: 300, y: 170, stroke: "#0284c7" },
+      { id: "uni_elec1", name_ar: "متطلب جامعة\nاختياري", name_en: "University\nElective 1", cr: 3, x: 140, y: 170, stroke: "#94a3b8" },
+
+      { id: "phys_lab", name_ar: "فيزياء عامة\nعملي", name_en: "General\nPhysics Lab", cr: 1, x: 1180, y: 300, stroke: "#c084fc" },
+      { id: "phys2", name_ar: "فيزياء 2", name_en: "Physics 2", cr: 3, x: 1020, y: 300, stroke: "#c084fc" },
+      { id: "calc2", name_ar: "تفاضل\nوتكامل 2", name_en: "Calculus 2", cr: 3, x: 860, y: 300, stroke: "#0284c7" },
+      { id: "chem", name_ar: "كيمياء\nعامة", name_en: "General\nChemistry", cr: 3, x: 700, y: 300, stroke: "#f472b6" },
+      { id: "oop", name_ar: "مقدمة إلى\nالبرمجة الكينونية", name_en: "Intro to\nOOP", cr: 3, x: 540, y: 300, stroke: "#facc15" },
+      { id: "ds", name_ar: "تراكيب\nالبيانات", name_en: "Data\nStructures", cr: 3, x: 380, y: 300, stroke: "#facc15" },
+      { id: "db", name_ar: "أساسيات\nقواعد البيانات", name_en: "Database\nFundamentals", cr: 3, x: 220, y: 300, stroke: "#0284c7" },
+
+      { id: "arabic", name_ar: "اللغة العربية\nومهارات التواصل", name_en: "Arabic\nLanguage", cr: 3, x: 1260, y: 430, stroke: "#0284c7" },
+      { id: "circuits", name_ar: "الدوائر\nالكهربائية", name_en: "Electric\nCircuits", cr: 3, x: 1100, y: 430, stroke: "#06b6d4" },
+      { id: "diff_eq", name_ar: "معادلات\nتفاضلية", name_en: "Differential\nEquations", cr: 3, x: 940, y: 430, stroke: "#0284c7" },
+      { id: "inter_calc", name_ar: "تحليل\nوسيط", name_en: "Intermediate\nAnalysis", cr: 3, x: 780, y: 430, stroke: "#0284c7" },
+      { id: "dig_logic", name_ar: "تصميم\nالمنطق الرقمي", name_en: "Digital Logic\nDesign", cr: 3, x: 620, y: 430, stroke: "#facc15" },
+      { id: "leadership", name_ar: "القيادة\nوالمسؤولية", name_en: "Leadership &\nResponsibility", cr: 3, x: 460, y: 430, stroke: "#94a3b8" },
+      { id: "unix", name_ar: "نظام\nاليونكس", name_en: "Unix\nSystem", cr: 3, x: 300, y: 430, stroke: "#f87171" },
+      { id: "comm_skills", name_ar: "مهارات الإتصال\nوالأخلاق المهنية", name_en: "Ethics &\nComm. Skills", cr: 2, x: 140, y: 430, stroke: "#f87171" },
+
+      { id: "elec_fund", name_ar: "مبادئ\nالإلكترونيات", name_en: "Electronics\nFundamentals", cr: 3, x: 1180, y: 560, stroke: "#06b6d4" },
+      { id: "sig_sys", name_ar: "تحليل الإشارات\nوالأنظمة", name_en: "Signals &\nSystems", cr: 3, x: 1020, y: 560, stroke: "#06b6d4" },
+      { id: "linear_sys", name_ar: "مقدمة في\nالأنظمة الخطية", name_en: "Intro to Linear\nSystems", cr: 3, x: 860, y: 560, stroke: "#06b6d4" },
+      { id: "logic_lab", name_ar: "مختبر تصميم\nالمنطق الرقمي", name_en: "Digital Logic\nLab", cr: 1, x: 700, y: 560, stroke: "#facc15" },
+      { id: "comp_org", name_ar: "تنظيم\nالحاسوب", name_en: "Computer\nOrganization", cr: 3, x: 540, y: 560, stroke: "#facc15" },
+      { id: "comp_arch", name_ar: "معمارية\nالحواسيب", name_en: "Computer\nArchitecture", cr: 3, x: 380, y: 560, stroke: "#facc15" },
+      { id: "entrep", name_ar: "الريادة\nوالإبداع", name_en: "Entrepreneurship\n& Innovation", cr: 2, x: 220, y: 560, stroke: "#0284c7" },
+
+      { id: "mil_sci", name_ar: "علوم\nعسكرية", name_en: "Military\nSciences", cr: 3, x: 1260, y: 690, stroke: "#0284c7" },
+      { id: "circ_lab", name_ar: "مختبر الدوائر\nالكهربائية", name_en: "Circuits\nLab", cr: 1, x: 1100, y: 690, stroke: "#06b6d4" },
+      { id: "data_comm", name_ar: "تراسل\nالبيانات", name_en: "Data\nCommunications", cr: 3, x: 940, y: 690, stroke: "#f87171" },
+      { id: "prob", name_ar: "الاحتمالات\nونظرية الأرتال", name_en: "Probability &\nQueuing Theory", cr: 3, x: 780, y: 690, stroke: "#f87171" },
+      { id: "micro_lab", name_ar: "مختبر المعالجات\nالدقيقة", name_en: "Microprocessors\nLab", cr: 1, x: 620, y: 690, stroke: "#facc15" },
+      { id: "micro_sys", name_ar: "أنظمة المعالجات\nالدقيقة", name_en: "Microprocessor\nSystems", cr: 3, x: 460, y: 690, stroke: "#facc15" },
+      { id: "os", name_ar: "نظم\nالتشغيل", name_en: "Operating\nSystems", cr: 3, x: 300, y: 690, stroke: "#facc15" },
+
+      { id: "sec_lab", name_ar: "مختبر أمن\nالمعلومات", name_en: "Info Security\nLab", cr: 1, x: 1180, y: 820, stroke: "#f87171" },
+      { id: "crypto", name_ar: "التشفير وأمن\nالشبكات", name_en: "Cryptography &\nSecurity", cr: 3, x: 1020, y: 820, stroke: "#f87171" },
+      { id: "net_fund", name_ar: "أساسيات شبكات\nالحاسوب", name_en: "Network\nFundamentals", cr: 3, x: 860, y: 820, stroke: "#f87171" },
+      { id: "draw", name_ar: "رسم\nهندسي", name_en: "Engineering\nDrawing", cr: 1, x: 700, y: 820, stroke: "#64748b" },
+      { id: "life_skills", name_ar: "المهارات\nالحياتية", name_en: "Life\nSkills", cr: 2, x: 540, y: 820, stroke: "#0284c7" },
+      { id: "uni_elec2", name_ar: "متطلب جامعة\nاختياري", name_en: "University\nElective 2", cr: 3, x: 380, y: 820, stroke: "#94a3b8" },
+      { id: "uni_elec3", name_ar: "متطلب جامعة\nاختياري", name_en: "University\nElective 3", cr: 3, x: 220, y: 820, stroke: "#94a3b8" },
+
+      { id: "eth_hack", name_ar: "مختبر الاختراق\nالأخلاقي", name_en: "Ethical Hacking\nLab", cr: 1, x: 1260, y: 950, stroke: "#f87171" },
+      { id: "net_sec_lab", name_ar: "مختبر أمن\nالشبكات", name_en: "Network Security\nLab", cr: 1, x: 1100, y: 950, stroke: "#f87171" },
+      { id: "net_sec", name_ar: "أمن\nالشبكات", name_en: "Network\nSecurity", cr: 3, x: 940, y: 950, stroke: "#f87171" },
+      { id: "net_proto", name_ar: "بروتوكولات\nالشبكات", name_en: "Network\nProtocols", cr: 3, x: 780, y: 950, stroke: "#f87171" },
+      { id: "wireless", name_ar: "الشبكات\nاللاسلكية", name_en: "Wireless\nNetworks", cr: 3, x: 620, y: 950, stroke: "#f87171" },
+      { id: "net_lab", name_ar: "مختبر شبكات\nالحاسوب", name_en: "Computer\nNetworks Lab", cr: 1, x: 460, y: 950, stroke: "#f87171" },
+      { id: "net_prog", name_ar: "برمجة\nالشبكات", name_en: "Network\nProgramming", cr: 3, x: 300, y: 950, stroke: "#f87171" },
+      { id: "dept_elec1", name_ar: "متطلب قسم\nاختياري", name_en: "Dept Elective\n(1)", cr: 3, x: 140, y: 950, stroke: "#f87171" },
+
+      { id: "dig_foren", name_ar: "التحقيقات\nالرقمية", name_en: "Digital\nForensics", cr: 3, x: 1150, y: 1090, stroke: "#f87171" },
+      { id: "net_protect", name_ar: "حماية شبكات\nالحاسوب", name_en: "Network\nProtection", cr: 3, x: 990, y: 1090, stroke: "#f87171" },
+      { id: "net_mgmt", name_ar: "إدارة\nالشبكات", name_en: "Network\nManagement", cr: 3, x: 840, y: 1090, stroke: "#f87171" },
+      { id: "multimedia", name_ar: "شبكات الوسائط\nالمتعددة", name_en: "Multimedia\nNetworks", cr: 3, x: 690, y: 1090, stroke: "#f87171" },
+      { id: "iot", name_ar: "إنترنت\nالأشياء", name_en: "Internet of\nThings (IoT)", cr: 3, x: 540, y: 1090, stroke: "#f87171" },
+      { id: "wire_lab", name_ar: "مختبر الشبكات\nاللاسلكية", name_en: "Wireless\nNetworks Lab", cr: 1, x: 390, y: 1090, stroke: "#f87171" },
+      { id: "dept_elec2", name_ar: "متطلب قسم\nاختياري", name_en: "Dept Elective\n(2)", cr: 3, x: 240, y: 1090, stroke: "#f87171" },
+
+      { id: "train", name_ar: "التدريب\nالميداني", name_en: "Field\nTraining", cr: 3, x: 920, y: 1220, stroke: "#f87171" },
+      { id: "proj1", name_ar: "مشروع تخرج\n1", name_en: "Graduation\nProject (1)", cr: 1, x: 760, y: 1220, stroke: "#f87171" },
+      { id: "proj2", name_ar: "مشروع تخرج\n2", name_en: "Graduation\nProject (2)", cr: 2, x: 600, y: 1220, stroke: "#f87171" }
+    ];
+
+    const links = [
+      { from: "prog1", to: "oop", type: "solid" },
+      { from: "oop", to: "ds", type: "solid" },
+      { from: "oop", to: "db", type: "solid" },
+      { from: "calc1", to: "calc2", type: "solid" },
+      { from: "phys1", to: "phys2", type: "solid" },
+      { from: "phys2", to: "phys_lab", type: "solid" },
+      { from: "calc2", to: "diff_eq", type: "solid" },
+      { from: "calc2", to: "inter_calc", type: "solid" },
+      { from: "phys2", to: "circuits", type: "solid" },
+      { from: "circuits", to: "diff_eq", type: "dashed" },
+      { from: "prog1", to: "dig_logic", type: "solid" },
+      { from: "circuits", to: "elec_fund", type: "solid" },
+      { from: "circuits", to: "sig_sys", type: "solid" },
+      { from: "circuits", to: "circ_lab", type: "dashed" },
+      { from: "dig_logic", to: "logic_lab", type: "dashed" },
+      { from: "dig_logic", to: "comp_org", type: "solid" },
+      { from: "comp_org", to: "comp_arch", type: "solid" },
+      { from: "sig_sys", to: "data_comm", type: "dashed" },
+      { from: "comp_org", to: "micro_sys", type: "solid" },
+      { from: "micro_sys", to: "micro_lab", type: "dashed" },
+      { from: "comp_arch", to: "os", type: "solid" },
+      { from: "data_comm", to: "net_fund", type: "solid" },
+      { from: "net_fund", to: "crypto", type: "solid" },
+      { from: "crypto", to: "sec_lab", type: "dashed" },
+      { from: "crypto", to: "net_sec", type: "solid" },
+      { from: "net_sec", to: "net_sec_lab", type: "dashed" },
+      { from: "net_sec", to: "eth_hack", type: "solid" },
+      { from: "net_fund", to: "net_proto", type: "solid" },
+      { from: "net_fund", to: "wireless", type: "solid" },
+      { from: "net_fund", to: "net_lab", type: "dashed" },
+      { from: "ds", to: "net_prog", type: "solid" },
+      { from: "unix", to: "net_prog", type: "dashed" },
+      { from: "crypto", to: "dig_foren", type: "solid" },
+      { from: "net_sec", to: "net_protect", type: "solid" },
+      { from: "net_proto", to: "net_mgmt", type: "solid" },
+      { from: "net_proto", to: "multimedia", type: "solid" },
+      { from: "wireless", to: "wire_lab", type: "dashed" },
+      { from: "wireless", to: "iot", type: "solid" },
+      { from: "proj1", to: "proj2", type: "dashed" }
+    ];
+
+    let userState = JSON.parse(localStorage.getItem('study_graph_state_v5') || '{}');
+    let activeCourseId = null;
+
+    const scene = document.getElementById('scene');
+    const nodesMap = {};
+    nodes.forEach(n => nodesMap[n.id] = n);
+
+    function isMobileDevice() {
+      return (window.innerWidth <= 768) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    }
+
+    function applyLangUI() {
+      const t = translations[currentLang];
+      document.documentElement.lang = currentLang;
+      document.body.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+
+      document.getElementById('lblTitle').innerText = t.title;
+      document.getElementById('themeBtn').innerText = currentTheme === 'dark' ? t.themeBtnLight : t.themeBtnDark;
+      document.getElementById('langBtn').innerText = t.langBtn;
+      document.getElementById('lblProgress').innerText = t.progress;
+      document.getElementById('lblHoursUnit').innerText = t.hoursUnit;
+      document.getElementById('lblCoursesUnit').innerText = t.coursesUnit;
+      document.getElementById('lblStatusCompleted').innerText = t.stCompleted;
+      document.getElementById('lblStatusCurrent').innerText = t.stCurrent;
+      document.getElementById('lblStatusNext').innerText = t.stNext;
+      document.getElementById('lblStatusSummer').innerText = t.stSummer;
+      document.getElementById('lblStatusNextYear').innerText = t.stNextYear;
+      document.getElementById('lblStatusTerm2028').innerText = t.stTerm2028;
+      
+      document.getElementById('lblControlsHint').innerText = isMobileDevice() ? t.hintMobile : t.hintPC;
+
+      document.getElementById('lblLegendTitle').innerText = t.legTitle;
+      document.getElementById('lblPrereqPass').innerText = t.legPass;
+      document.getElementById('lblPrereqStudy').innerText = t.legStudy;
+
+      document.getElementById('btnMCompleted').innerText = t.mComp;
+      document.getElementById('btnMCurrent').innerText = t.mCurr;
+      document.getElementById('btnMNext').innerText = t.mNext;
+      document.getElementById('btnMSummer').innerText = t.mSumm;
+      document.getElementById('btnMNextYear').innerText = t.mNY;
+      document.getElementById('btnMTerm2028').innerText = t.mTerm28;
+      document.getElementById('btnMReset').innerText = t.mReset;
+    }
+
+    function toggleTheme() {
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.body.className = `${currentTheme}-mode`;
+      localStorage.setItem('study_theme', currentTheme);
+      applyLangUI();
+    }
+
+    function toggleLang() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('study_lang', currentLang);
+      applyLangUI();
+      renderDiagram();
+    }
+
+    function renderDiagram() {
+      scene.innerHTML = '';
+
+      links.forEach(l => {
+        const source = nodesMap[l.from];
+        const target = nodesMap[l.to];
+        if (!source || !target) return;
+
+        const dx = target.x - source.x;
+        const dy = target.y - source.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist === 0) return;
+
+        const x1 = source.x + (dx / dist) * ringRadius;
+        const y1 = source.y + (dy / dist) * ringRadius;
+        const x2 = target.x - (dx / dist) * (ringRadius + 5);
+        const y2 = target.y - (dy / dist) * (ringRadius + 5);
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y2", y2);
+        line.setAttribute("class", l.type === 'dashed' ? 'link-dashed' : 'link-solid');
+        line.setAttribute("marker-end", l.type === 'dashed' ? 'url(#arrow-dashed)' : 'url(#arrow-solid)');
+        scene.appendChild(line);
+      });
+
+      const t = translations[currentLang];
+      nodes.forEach(n => {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", `node-group status-${userState[n.id] || 'none'}`);
+        g.setAttribute("id", `node-${n.id}`);
+
+        let pressTimer = null;
+        let isLongPress = false;
+
+        const startPress = (clientX, clientY) => {
+          isLongPress = false;
+          pressTimer = setTimeout(() => {
+            isLongPress = true;
+            if (navigator.vibrate) navigator.vibrate(40);
+            openModal(clientX, clientY, n);
+          }, 450);
+        };
+
+        const cancelPress = () => {
+          if (pressTimer) clearTimeout(pressTimer);
+        };
+
+        g.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            startPress(touch.clientX, touch.clientY);
+          }
+        }, { passive: true });
+
+        g.addEventListener('touchmove', cancelPress, { passive: true });
+
+        g.addEventListener('touchend', (e) => {
+          cancelPress();
+          if (!isLongPress && e.changedTouches.length === 1) {
+            toggleComplete(n.id);
+          }
+        });
+
+        g.onclick = (e) => {
+          e.stopPropagation();
+          toggleComplete(n.id);
+        };
+
+        g.oncontextmenu = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openModal(e.clientX, e.clientY, n);
+        };
+
+        const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        ring.setAttribute("cx", n.x);
+        ring.setAttribute("cy", n.y);
+        ring.setAttribute("r", ringRadius);
+        ring.setAttribute("class", "status-ring");
+        g.appendChild(ring);
+
+        const mask = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        mask.setAttribute("cx", n.x);
+        mask.setAttribute("cy", n.y);
+        mask.setAttribute("r", nodeRadius);
+        mask.setAttribute("class", "node-mask");
+        g.appendChild(mask);
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", n.x);
+        circle.setAttribute("cy", n.y);
+        circle.setAttribute("r", nodeRadius);
+        circle.setAttribute("class", "node-circle");
+        circle.setAttribute("stroke", n.stroke);
+        g.appendChild(circle);
+
+        const nameText = currentLang === 'ar' ? n.name_ar : n.name_en;
+        const lines = nameText.split('\n');
+        const lineHeight = 12.5;
+        const startY = n.y - ((lines.length) * lineHeight) / 2;
+
+        lines.forEach((txt, idx) => {
+          const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          textEl.setAttribute("x", n.x);
+          textEl.setAttribute("y", startY + (idx * lineHeight));
+          textEl.setAttribute("class", "node-text");
+          textEl.textContent = txt;
+          g.appendChild(textEl);
+        });
+
+        const crEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        crEl.setAttribute("x", n.x);
+        crEl.setAttribute("y", n.y + 28);
+        crEl.setAttribute("class", "node-credits");
+        crEl.textContent = `${n.cr} ${t.crSuffix}`;
+        g.appendChild(crEl);
+
+        scene.appendChild(g);
+      });
+
+      updateStats();
+    }
+
+    function toggleComplete(courseId) {
+      const currentStatus = userState[courseId];
+      const newStatus = (currentStatus === 'completed') ? 'none' : 'completed';
+      activeCourseId = courseId;
+      setCourseStatus(newStatus);
+    }
+
+    const modal = document.getElementById('actionModal');
+    function openModal(clientX, clientY, node) {
+      activeCourseId = node.id;
+      const title = currentLang === 'ar' ? node.name_ar.replace(/\n/g, ' ') : node.name_en.replace(/\n/g, ' ');
+      document.getElementById('modalCourseTitle').textContent = `${title} (${node.cr} ${translations[currentLang].crSuffix})`;
+
+      modal.style.display = 'block';
+      modal.classList.remove('show');
+
+      if (window.innerWidth > 768) {
+        let left = clientX + 10;
+        let top = clientY + 10;
+        if (left + 270 > window.innerWidth) left = clientX - 270;
+        if (top + 340 > window.innerHeight) top = clientY - 340;
+        modal.style.left = left + 'px';
+        modal.style.top = top + 'px';
+      }
+
+      requestAnimationFrame(() => modal.classList.add('show'));
+    }
+
+    function hideModal() {
+      modal.classList.remove('show');
+      modal.style.display = 'none';
+    }
+
+    window.onclick = function(e) {
+      if (!e.target.closest('#actionModal')) {
+        hideModal();
+      }
+    };
+
+    window.addEventListener('touchstart', (e) => {
+      if (!e.target.closest('#actionModal') && !e.target.closest('.node-group')) {
+        hideModal();
+      }
+    }, { passive: true });
+
+    function setCourseStatus(status) {
+      if (!activeCourseId) return;
+      if (status === 'none') {
+        delete userState[activeCourseId];
+      } else {
+        userState[activeCourseId] = status;
+      }
+      localStorage.setItem('study_graph_state_v5', JSON.stringify(userState));
+
+      const nodeEl = document.getElementById(`node-${activeCourseId}`);
+      if (nodeEl) {
+        nodeEl.setAttribute('class', `node-group status-${status}`);
+      }
+
+      updateStats();
+      hideModal();
+    }
+
+    function updateStats() {
+      const counts = { completed: 0, current: 0, next: 0, summer: 0, nextYear: 0, term2028: 0 };
+      const hours = { completed: 0, current: 0, next: 0, summer: 0, nextYear: 0, term2028: 0 };
+      const totalDegreeHours = 160;
+
+      nodes.forEach(n => {
+        const s = userState[n.id];
+        if (s && counts[s] !== undefined) {
+          counts[s]++;
+          hours[s] += n.cr;
+        } else if (s === 'next-year') {
+          counts.nextYear++;
+          hours.nextYear += n.cr;
+        } else if (s === 'term-2028') {
+          counts.term2028++;
+          hours.term2028 += n.cr;
+        }
+      });
+
+      const t = translations[currentLang];
+      document.getElementById('totalCourses').innerText = nodes.length;
+      document.getElementById('completedCourses').innerText = counts.completed;
+      document.getElementById('totalHours').innerText = totalDegreeHours;
+      document.getElementById('completedHours').innerText = hours.completed;
+
+      document.getElementById('count-completed').innerText = `${hours.completed} ${t.crSuffix} (${counts.completed})`;
+      document.getElementById('count-current').innerText = `${hours.current} ${t.crSuffix} (${counts.current})`;
+      document.getElementById('count-next').innerText = `${hours.next} ${t.crSuffix} (${counts.next})`;
+      document.getElementById('count-summer').innerText = `${hours.summer} ${t.crSuffix} (${counts.summer})`;
+      document.getElementById('count-next-year').innerText = `${hours.nextYear} ${t.crSuffix} (${counts.nextYear})`;
+      document.getElementById('count-term-2028').innerText = `${hours.term2028} ${t.crSuffix} (${counts.term2028})`;
+
+      const pct = Math.round((hours.completed / totalDegreeHours) * 100);
+      document.getElementById('pctText').innerText = pct + '%';
+      document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    let isPanning = false;
+    let startX = 0, startY = 0;
+    let currentX = 15, currentY = 100, scale = 0.65;
+    let initialPinchDist = null;
+    let initialPinchScale = 1;
+    let pinchAnchorScreen = null;
+    let pinchAnchorScene = null;
+    const MIN_SCALE = 0.15, MAX_SCALE = 2.5;
+    let fitTimeout = null;
+
+    function applyTransform() {
+      scene.setAttribute("transform", `translate(${currentX}, ${currentY}) scale(${scale})`);
+    }
+
+    function animatedTransform() {
+      scene.style.transition = 'transform 0.32s cubic-bezier(0.22,1,0.36,1)';
+      applyTransform();
+      clearTimeout(fitTimeout);
+      fitTimeout = setTimeout(() => { scene.style.transition = ''; }, 340);
+    }
+
+    function zoomAround(screenX, screenY, newScale) {
+      newScale = Math.min(Math.max(MIN_SCALE, newScale), MAX_SCALE);
+      const sceneX = (screenX - currentX) / scale;
+      const sceneY = (screenY - currentY) / scale;
+      currentX = screenX - sceneX * newScale;
+      currentY = screenY - sceneY * newScale;
+      scale = newScale;
+    }
+
+    function zoomStep(dir) {
+      const vw = viewport.clientWidth, vh = viewport.clientHeight;
+      zoomAround(vw / 2, vh / 2, scale * (dir > 0 ? 1.28 : 0.78));
+      animatedTransform();
+    }
+
+    function getGraphBounds() {
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      nodes.forEach(n => {
+        minX = Math.min(minX, n.x - ringRadius - 6);
+        maxX = Math.max(maxX, n.x + ringRadius + 6);
+        minY = Math.min(minY, n.y - ringRadius - 20);
+        maxY = Math.max(maxY, n.y + ringRadius + 34);
+      });
+      return { minX, maxX, minY, maxY };
+    }
+
+    function centerOn(targetX, targetY, targetScale, animate) {
+      const vw = viewport.clientWidth, vh = viewport.clientHeight;
+      const headerH = document.getElementById('dashboard').getBoundingClientRect().height;
+      const availTop = headerH + 16;
+      const availH = Math.max(120, vh - availTop - 16);
+      scale = Math.min(Math.max(MIN_SCALE, targetScale), MAX_SCALE);
+      currentX = vw / 2 - targetX * scale;
+      currentY = availTop + availH / 2 - targetY * scale;
+      if (animate) animatedTransform(); else applyTransform();
+    }
+
+    function fitToScreen(animate) {
+      const b = getGraphBounds();
+      const graphW = b.maxX - b.minX;
+      const graphH = b.maxY - b.minY;
+      const vw = viewport.clientWidth, vh = viewport.clientHeight;
+      const headerH = document.getElementById('dashboard').getBoundingClientRect().height;
+      const pad = 20;
+      const availW = Math.max(100, vw - pad * 2);
+      const availH = Math.max(100, vh - headerH - pad * 2 - 12);
+      const fitScale = Math.min(availW / graphW, availH / graphH);
+      const midX = (b.minX + b.maxX) / 2;
+      const midY = (b.minY + b.maxY) / 2;
+      centerOn(midX, midY, fitScale, animate);
+    }
+
+    function mobileFocusScale() {
+      const vw = viewport.clientWidth;
+      return Math.min(1.05, Math.max(0.55, vw / 480));
+    }
+
+    function initialMobileView() {
+      const activeNodes = nodes.filter(n => userState[n.id] === 'current');
+      let tx, ty;
+      if (activeNodes.length) {
+        tx = activeNodes.reduce((s, n) => s + n.x, 0) / activeNodes.length;
+        ty = activeNodes.reduce((s, n) => s + n.y, 0) / activeNodes.length;
+      } else {
+        tx = 700; ty = 170;
+      }
+      centerOn(tx, ty, mobileFocusScale(), false);
+    }
+
+    function toggleCollapse() {
+      const dash = document.getElementById('dashboard');
+      dash.classList.toggle('collapsed');
+      document.getElementById('collapseBtn').textContent = dash.classList.contains('collapsed') ? '▾' : '▴';
+    }
+
+    const viewport = document.getElementById('viewport');
+
+    viewport.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.node-group') || e.button !== 0) return;
+      isPanning = true;
+      startX = e.clientX - currentX;
+      startY = e.clientY - currentY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      currentX = e.clientX - startX;
+      currentY = e.clientY - startY;
+      applyTransform();
+    });
+
+    window.addEventListener('mouseup', () => { isPanning = false; });
+
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = viewport.getBoundingClientRect();
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      zoomAround(e.clientX - rect.left, e.clientY - rect.top, scale * zoomFactor);
+      applyTransform();
+    }, { passive: false });
+
+    viewport.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1 && !e.target.closest('.node-group')) {
+        isPanning = true;
+        startX = e.touches[0].clientX - currentX;
+        startY = e.touches[0].clientY - currentY;
+      } else if (e.touches.length === 2) {
+        isPanning = false;
+        const rect = viewport.getBoundingClientRect();
+        const t0 = e.touches[0], t1 = e.touches[1];
+        initialPinchDist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+        initialPinchScale = scale;
+        const midX = (t0.clientX + t1.clientX) / 2 - rect.left;
+        const midY = (t0.clientY + t1.clientY) / 2 - rect.top;
+        pinchAnchorScreen = { x: midX, y: midY };
+        pinchAnchorScene = { x: (midX - currentX) / scale, y: (midY - currentY) / scale };
+      }
+    }, { passive: false });
+
+    viewport.addEventListener('touchmove', (e) => {
+      if (isPanning && e.touches.length === 1) {
+        currentX = e.touches[0].clientX - startX;
+        currentY = e.touches[0].clientY - startY;
+        applyTransform();
+      } else if (e.touches.length === 2 && initialPinchDist) {
+        e.preventDefault();
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const factor = dist / initialPinchDist;
+        const newScale = Math.min(Math.max(MIN_SCALE, initialPinchScale * factor), MAX_SCALE);
+        currentX = pinchAnchorScreen.x - pinchAnchorScene.x * newScale;
+        currentY = pinchAnchorScreen.y - pinchAnchorScene.y * newScale;
+        scale = newScale;
+        applyTransform();
+      }
+    }, { passive: false });
+
+    viewport.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) initialPinchDist = null;
+      if (e.touches.length === 0) isPanning = false;
+    });
+
+    window.addEventListener('resize', () => {
+      applyLangUI();
+    });
+
+    document.body.className = `${currentTheme}-mode`;
+    if (isMobileDevice()) {
+      document.getElementById('dashboard').classList.add('collapsed');
+      document.getElementById('collapseBtn').textContent = '▾';
+    }
+    applyLangUI();
+    renderDiagram();
+    if (isMobileDevice()) {
+      initialMobileView();
+    } else {
+      currentX = 15; currentY = 100; scale = 0.65;
+      applyTransform();
+    }
+  </script>
+</body>
+</html>
